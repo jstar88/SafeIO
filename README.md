@@ -11,30 +11,50 @@ As PHP manual say, multithreading is not supported yet.
 
 Download *SafeIO.php* and include it in your scripts:
 
-```php 
+```php
     require('SafeIO.php');
 ```
 
 
-## Usage
+## Basic usage
 
 Retrive data from a file:
 
 ```php 
-    SafeIO::open("data.txt");
+    $filePath = "data.txt";
+    SafeIO::open($filePath);
 ```
 
 Exporting data in a file:
 
 ```php 
-    SafeIO::save($content, "data.txt");
+    $filePath = "data.txt";
+    $contents = "some cool data";
+    SafeIO::save($filePath, $contents ,$reset);
 ```
 
-Request a lock for near-future write
+## More for you: transactions
+
+Transactions are usefull to ensure an atomic behavior. Expecially, in generic applications
+, you need to execute actions that require time (like DB queries,loop etc) to know exactly what you need to do:
+in this situation a common problem is to keep unchanged the target file from modification of others processes.
+It's easier to see the code ;)
+
+Starting a transaction:
 
 ```php 
-    SafeIO::requireWriteLock("data.txt");
+    SafeIO::startTransaction("data.txt");
 ```
+
+Stopping a transaction and writing the file:
+
+```php 
+    SafeIO::stopTransaction("data.txt", $contents, $reset );
+```
+Note: 
+* calling function *SafeIO::save* will automatically end and flush the active transaction.
+* you can keep active multiple transactions(one per file)
+
 
 
 
