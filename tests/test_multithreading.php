@@ -1,6 +1,6 @@
 <?php
 
-include_once ("SafeIO.php");
+include_once ("../SafeIO.php");
 include_once ("Thread.php");
 
 function exception_handler($exception)
@@ -27,14 +27,14 @@ function read($u)
 
 function write($content)
 {
-    SafeIO::save($content, "data.txt");
+    SafeIO::save("data.txt",$content);
     return $content;
 }
 function write_slow($content)
 {
-    SafeIO::requireWriteLock("data.txt");
+    SafeIO::startTransaction("data.txt");
     for($i=0;$i<10000;$i++){}
-    SafeIO::save($content, "data.txt");
+    SafeIO::save("data.txt",$content);
     return $content;
 }
 

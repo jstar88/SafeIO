@@ -10,7 +10,7 @@
 class SafeIO
 {
     const PERMISSIONS = 0664;
-    static $handle = array();
+    private static $handle = array();
 
     /**
      * SafeIO::open()
@@ -23,12 +23,8 @@ class SafeIO
         if (!file_exists($path)) throw new Exception("file not exist " . $path);
         if (!is_readable($path)) throw new Exception("file not readable " . $path);
         // Open for reading only; place the file pointer at the beginning of the file.
-        if(!isset(self::$handle[$path]))
-        {
-            self::$handle[$path] = fopen($path, "a+");
-        }
-        rewind(self::$handle[$path]);
-        $handle = self::$handle[$path];
+        //rewind(self::$handle[$path]);
+        $handle = fopen($path, "r");
         if (!$handle) throw new Exception("Error while opening the file " . $path);
         // acquire a shared lock
         if (flock($handle, LOCK_SH))
@@ -49,45 +45,62 @@ class SafeIO
      * @param string $content
      * @param string $path
      * @param boolean $reset
-     * @return null
+     * @return void
      */
-    public static function save($content, $path, $reset = true)
+    public static function save($path, $content, $reset = true)
     {
-        self::requireWriteLock($path);
+        self::startTransaction($path);
+        self::stopTransaction($path, $content, $reset);
+    }
+
+
+    /**
+     * SafeIO::startTransaction()
+     * Start a transaction where nobody except you can write the file.
+     * 
+     * @param string $path
+     * @return void
+     */
+    public static function startTransaction($path)
+    {
+        if (file_exists($path) && !is_writable($path)) throw new Exception("File not writable at " . $path);
+        // Open for writing only; place the file pointer at the end of the file.
+        // If the file does not exist, attempt to create it.
+        // "w" option is not used to avoid the erase before locking.
+        if (!isset(self::$handle[$path]))
+        {
+            self::$handle[$path] = fopen($path, "a");
+        }
+        $handle = self::$handle[$path];
+        if (!$handle) throw new Exception("Error while opening the file " . $path);
+        // acquire an exclusive lock or wait for it.
+        if (!flock($handle, LOCK_EX)) throw new Exception("Error while trying to get lock at " . $path);
+    }
+    
+    
+    /**
+     * SafeIO::stopTransaction()
+     * 
+     * Stop the current transaction and write the file.
+     * @param string $path
+     * @param string $content
+     * @param bool $reset
+     * @return void
+     */
+    public static function stopTransaction($path, $content = "", $reset = false)
+    {
+        if (file_exists($path) && !is_writable($path)) throw new Exception("File not writable at " . $path);
+        if (!isset(self::$handle[$path])) throw new Exception("Transaction not started at file " . $path);
         $handle = self::$handle[$path];
         // if the file must be cleaned trunk him.
         if ($reset) ftruncate($handle, 0);
         // write the contents.
         if (fputs($handle, $content) === false) throw new Exception("Error while saving contents at " . $path);
         // flush output before releasing the lock
-        //fflush(self::$handle);
-        // release the lock
+        fflush($handle);
         flock($handle, LOCK_UN);
         fclose($handle);
+        unset(self::$handle[$path]["w"]);
         chmod($path, self::PERMISSIONS);
-    }
-    
-    
-    /**
-     * SafeIO::requireWriteLock()
-     * 
-     * @param string $path
-     * @return resource file
-     */
-    public static function requireWriteLock($path)
-    {
-        if (file_exists($path) && !is_writable($path)) throw new Exception("File not writable at " . $path);
-        // Open for writing only; place the file pointer at the end of the file.
-        // If the file does not exist, attempt to create it.
-        // "w" option is not used to avoid the erase before locking.
-        if(!isset(self::$handle[$path]))
-        {
-            self::$handle[$path] = fopen($path, "a+");
-        }
-        fseek(self::$handle[$path],0,SEEK_END);
-        $handle = self::$handle[$path];
-        if (!$handle) throw new Exception("Error while opening the file " . $path);
-        // acquire an exclusive lock or wait for it.
-        if (!flock($handle, LOCK_EX)) throw new Exception("Error while trying to get lock at " . $path);
     }
 }
