@@ -30,7 +30,8 @@ Exporting data in a file:
 ```php 
     $filePath = "data.txt";
     $contents = "some cool data";
-    SafeIO::save($filePath, $contents ,$reset);
+    $reset = true; // true means discard old content inside the file
+    SafeIO::save($filePath, $contents , $reset);
 ```
 
 ## More for you: transactions
@@ -43,17 +44,33 @@ It's easier to see the code ;)
 Starting a transaction:
 
 ```php 
-    SafeIO::startTransaction("data.txt");
+    $filePath = "data.txt";
+    SafeIO::startTransaction($filePath);
 ```
 
 Stopping a transaction and writing the file:
 
 ```php 
+    $filePath = "data.txt";
+    $contents = "some cool data";
+    $reset = true;
     SafeIO::stopTransaction("data.txt", $contents, $reset );
 ```
 Note: 
 * calling function *SafeIO::save* will automatically end and flush the active transaction.
 * you can keep active multiple transactions(one per file)
+
+
+An example:
+```php 
+    include("../SafeIO.php");
+    SafeIO::startTransaction("data.txt","hello world!");
+    //<----                                                 
+    //  ... Other users can't write data.txt while you are inside here ...
+    //<----                                                     
+    SafeIO::stopTransaction("data.txt"); // now the lock is released   
+    echo SafeIO::open("data.txt");
+```
 
 
 
