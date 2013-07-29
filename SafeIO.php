@@ -10,6 +10,7 @@
 class SafeIO
 {
     const PERMISSIONS = 0664;
+    static $handle ="";
 
     /**
      * SafeIO::open()
@@ -22,15 +23,20 @@ class SafeIO
         if (!file_exists($path)) throw new Exception("file not exist " . $path);
         if (!is_readable($path)) throw new Exception("file not readable " . $path);
         // Open for reading only; place the file pointer at the beginning of the file.
-        $fo = fopen($path, 'r');
-        if (!$fo) throw new Exception("Error while opening the file " . $path);
-        // acquire a shared lock
-        if (flock($fo, LOCK_SH))
+        if(empty(self::$handle))
         {
-            $cts = fread($fo, filesize($path));
-            flock($fo, LOCK_UN);
-            fclose($fo);
-            chmod($path, self::PERMISSIONS);
+            self::$handle = fopen($path, "a+");
+        }
+        //rewind(self::$handle);
+        //$fo = fopen($path, 'r');
+        if (!self::$handle) throw new Exception("Error while opening the file " . $path);
+        // acquire a shared lock
+        if (flock(self::$handle, LOCK_SH))
+        {
+            $cts = fread(self::$handle, filesize($path));
+            flock(self::$handle, LOCK_UN);
+            fclose(self::$handle);
+            //chmod($path, self::PERMISSIONS);
             return $cts;
         }
         else throw new Exception("Error while trying to get lock at " . $path);
@@ -47,17 +53,17 @@ class SafeIO
      */
     public static function save($content, $path, $reset = true)
     {
-        $fp = self::requireWriteLock($path);
+        self::requireWriteLock($path);
         // if the file must be cleaned trunk him.
-        if ($reset) ftruncate($fp, 0);
+        if ($reset) ftruncate(self::$handle, 0);
         // write the contents.
-        if (fputs($fp, $content) === false) throw new Exception("Error while saving contents at " . $path);
+        if (fputs(self::$handle, $content) === false) throw new Exception("Error while saving contents at " . $path);
         // flush output before releasing the lock
-        fflush($fp);
+        //fflush(self::$handle);
         // release the lock
-        flock($fp, LOCK_UN);
-        fclose($fp);
-        chmod($path, self::PERMISSIONS);
+        flock(self::$handle, LOCK_UN);
+        fclose(self::$handle);
+        //chmod($path, self::PERMISSIONS);
     }
     
     
@@ -73,10 +79,12 @@ class SafeIO
         // Open for writing only; place the file pointer at the end of the file.
         // If the file does not exist, attempt to create it.
         // "w" option is not used to avoid the erase before locking.
-        $fp = fopen($path, "a");
-        if (!$fp) throw new Exception("Error while opening the file " . $path);
+        if(empty(self::$handle))
+        {
+            self::$handle = fopen($path, "a+");
+        }
+        if (!self::$handle) throw new Exception("Error while opening the file " . $path);
         // acquire an exclusive lock or wait for it.
-        if (!flock($fp, LOCK_EX)) throw new Exception("Error while trying to get lock at " . $path);
-        return $fp;
+        if (!flock(self::$handle, LOCK_EX)) throw new Exception("Error while trying to get lock at " . $path);
     }
 }
