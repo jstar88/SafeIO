@@ -27,8 +27,7 @@ class SafeIO
         {
             self::$handle = fopen($path, "a+");
         }
-        //rewind(self::$handle);
-        //$fo = fopen($path, 'r');
+        rewind(self::$handle);
         if (!self::$handle) throw new Exception("Error while opening the file " . $path);
         // acquire a shared lock
         if (flock(self::$handle, LOCK_SH))
@@ -36,7 +35,7 @@ class SafeIO
             $cts = fread(self::$handle, filesize($path));
             flock(self::$handle, LOCK_UN);
             fclose(self::$handle);
-            //chmod($path, self::PERMISSIONS);
+            chmod($path, self::PERMISSIONS);
             return $cts;
         }
         else throw new Exception("Error while trying to get lock at " . $path);
@@ -63,7 +62,7 @@ class SafeIO
         // release the lock
         flock(self::$handle, LOCK_UN);
         fclose(self::$handle);
-        //chmod($path, self::PERMISSIONS);
+        chmod($path, self::PERMISSIONS);
     }
     
     
