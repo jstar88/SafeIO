@@ -100,7 +100,7 @@ class SafeIO
         fflush($handle);
         flock($handle, LOCK_UN);
         fclose($handle);
-        unset(self::$handle[$path]["w"]);
+        unset(self::$handle[$path]);
         chmod($path, self::PERMISSIONS);
     }
 }
