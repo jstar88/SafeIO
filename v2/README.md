@@ -78,6 +78,14 @@ Download *ConcurrentFile.php* and include it in your scripts:
 * remember to close the file;
 * you can use unset($file) instead close();
 
+#### The multitone:
+```php 
+    $filePath = "data.txt";
+    $file = ConcurrentFile::getInstance($filePath);
+    $file->close();
+```
+* the multitone is usefull to reuse the already created object from differents pages.
+
 
 #### Retrive data from a file:
 
