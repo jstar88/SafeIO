@@ -54,7 +54,7 @@ Stopping a transaction and writing the file:
     $filePath = "data.txt";
     $contents = "some cool data";
     $reset = true;
-    SafeIO::stopTransaction("data.txt", $contents, $reset );
+    SafeIO::stopTransaction($filePath, $contents, $reset );
 ```
 Note: 
 * calling function *SafeIO::save* will automatically end and flush the active transaction.
