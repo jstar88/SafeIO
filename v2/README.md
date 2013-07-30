@@ -18,7 +18,7 @@ Download *ConcurrentFile.php* and include it in your scripts:
 
 ## Basic usage
 
-The ConcurrentFile object:
+#### The ConcurrentFile object:
 
 ```php 
     $filePath = "data.txt";
@@ -30,7 +30,7 @@ Note:
 * you can use unset($file) instead close();
 
 
-Retrive data from a file:
+#### Retrive data from a file:
 
 ```php 
     $filePath = "data.txt";
@@ -42,7 +42,7 @@ Retrive data from a file:
 Note:
 * read() is always atomic and safe.
 
-Exporting data in a file:
+#### Exporting data in a file:
 
 ```php 
     $filePath = "data.txt";
@@ -63,7 +63,7 @@ Transactions are usefull to ensure an atomic behavior. Expecially, in generic ap
 in this situation a common problem is to keep unchanged the target file from modification of others processes.
 It's easier to see the code ;)
 
-Write lock:
+#### Write lock:
 
 ```php 
     $filePath = "data.txt";
@@ -78,7 +78,7 @@ Note:
 * inside the write lock you can also read and write whenever as you want;
 * inside the write lock, others processes are blocked from read and write.
 
-Read lock:
+#### Read lock:
 
 ```php 
     $filePath = "data.txt";
@@ -93,7 +93,7 @@ Note:
 * inside the read lock you can also read and write whenever as you want;
 * inside the read lock, others processes are blocked from write.
 
-Nested lock:
+#### Nested lock:
 
 ```php 
     $filePath = "data.txt";
@@ -110,7 +110,7 @@ Nested lock:
 
 
 
-An example:
+#### An example:
 In this example another process must wait for the end of *read and write* of this one.
 ```php 
     $file = new ConcurrentFile("data.txt");
