@@ -7,10 +7,10 @@ A class usefull to avoid concurrancy managing files.
 
 #### The problem: cuncurrancy
 Concurrency is a property of systems in which several computations are executing simultaneously, and potentially interacting with each other.
-Most of time you can see cuncurrancy problem in multithread applications.
-Currently PHP doesn't support multithreading but it allocate one process to each new request. 
-Processes can execute the same script and access the same file simultaneously in the hard disk doing writes and reads.
-When this happen it's possible to have a race condition with the result of corrupted or inconsistent file.
+Most of time you can see cuncurrancy problem in multithread applications.  
+Currently PHP doesn't support multithreading but it allocate one process to each new request.   
+Processes can execute the same script and access the same file simultaneously in the hard disk doing writes and reads.  
+When this happen it's possible to have a race condition with the result of corrupted or inconsistent file.  
 
 #### PHP solution
 
@@ -22,9 +22,9 @@ The *flock* function suffer about portability,hard usage and has inadequate docu
 
 #### SafeIO coming to help
 
-SafeIO is an utility to open - write contents in files based on PHP *flock* function.
-It simplifies the flock way and add some very usefull features.
-It's not just a wrapper, it's a cuncurrancy manager:
+SafeIO is an utility to open - write contents in files based on PHP *flock* function.  
+It simplifies the flock way and add some very usefull features.  
+It's not just a wrapper, it's a cuncurrancy manager:  
 infact you can make your preferred execution queue blocking others processes from reading and/or writing.
 
 ## Installation
@@ -73,9 +73,9 @@ Download *ConcurrentFile.php* and include it in your scripts:
 * $reset is true by default: it means to discard the old contents;
 * write() is always atomic and safe.
 
-## More for you: transactions
+## More for you: locks
 
-Transactions are usefull to ensure an atomic behavior. Expecially, in generic applications
+Locks are usefull to ensure an atomic behavior. Expecially, in generic applications
 , you need to execute actions that require time (like DB queries,loop etc) to know exactly what you need to do:
 in this situation a common problem is to keep unchanged the target file from modification of others processes.
 It's easier to see the code ;)
