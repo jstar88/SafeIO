@@ -17,7 +17,7 @@ When this happen it's possible to have a race condition with the result of corru
 PHP provide the [*flock*](http://php.net/manual/en/function.flock.php) function that perform a file locking in different way:
 * shared lock (reader)
 * exclusive lock (writer)
-* 
+ 
 The *flock* function suffer about portability,hard usage and has inadequate documentation.
 
 #### SafeIO coming to help
