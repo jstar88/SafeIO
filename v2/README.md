@@ -25,7 +25,6 @@ Download *ConcurrentFile.php* and include it in your scripts:
     $file = new ConcurrentFile($filePath);
     $file->close();
 ```
-Note:
 * remember to close the file;
 * you can use unset($file) instead close();
 
@@ -39,7 +38,6 @@ Note:
     $file->close();
     echo $contents;
 ```
-Note:
 * read() is always atomic and safe.
 
 #### Exporting data in a file:
@@ -52,7 +50,6 @@ Note:
     $file->write($contents, $reset);
     $file->close();
 ```
-Note:
 * $reset is true by default: it means to discard the old contents;
 * write() is always atomic and safe.
 
@@ -73,7 +70,6 @@ It's easier to see the code ;)
     $file->releaseLock();
     $file->close();
 ```
-Note:
 * close() will automatically call releaseLock() if needed;
 * inside the write lock you can also read and write whenever as you want;
 * inside the write lock, others processes are blocked from read and write.
@@ -88,7 +84,6 @@ Note:
     $file->releaseLock();
     $file->close();
 ```
-Note: 
 * close() will automatically call releaseLock() if needed;
 * inside the read lock you can also read and write whenever as you want;
 * inside the read lock, others processes are blocked from write.
