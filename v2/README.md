@@ -27,6 +27,36 @@ It simplifies the flock way and add some very usefull features.
 It's not just a wrapper, it's a cuncurrancy manager:  
 infact you can make your preferred execution queue blocking others processes from reading and/or writing.
 
+#### I really need this?
+Let's do some examples.
+Consider the same php script started by 2 different request A and B(each request is a browser click).  
+The script is responsible to read a configuration file and update it.  
+
+##### case 1: no precautions
+1. The process A is created before B;
+2. The process A read the file;
+3. B is created;
+4. A start to write the file
+5. B try to read the file with the effect to stop the writing of A 
+6. configuration file is empty or corrupted
+
+##### case 2: flock
+1. The process A is created before B;
+2. The process A read the file;
+3. B is created and read the file;
+4. A would start write the file but it see B is reading: it wait;
+5. B finished to read, then A start to write;
+5. A finished to write, then B start to write. 
+6. configuration file is not corrupted BUT process A job was totally useless cause B was the last writer.
+
+##### case 3: SafeIO
+1. The process A is created before B;
+2. The process A read the file;
+3. B is created but SafeIo tell him to wait;
+4. A finished to read and write;
+5. B read the data updated by A and then write;
+5. configuration file is not corrupted and each processes used fresh data. 
+
 ## Installation
 
 Download *ConcurrentFile.php* and include it in your scripts:
