@@ -4,8 +4,27 @@ SafeIO v2
 A class usefull to avoid concurrancy managing files.
 
 ## Introduction
+
+#### The problem: cuncurrancy
+Concurrency is a property of systems in which several computations are executing simultaneously, and potentially interacting with each other.
+Most of time you can see cuncurrancy problem in multithread applications.
+Currently PHP doesn't support multithreading but it allocate one process to each new request. 
+Processes can execute the same script and access the same file simultaneously in the hard disk doing writes and reads.
+When this happen it's possible to have a race condition with the result of corrupted or inconsistent file.
+
+#### PHP solution
+
+PHP provide the [*flock*](http://php.net/manual/en/function.flock.php) function that perform a file locking in different way:
+* shared lock (reader)
+* exclusive lock (writer)
+The *flock* function suffer about portability,hard usage and has inadequate documentation.
+
+#### SafeIO coming to help
+
 SafeIO is an utility to open - write contents in files based on PHP *flock* function.
-As PHP manual say, multithreading is not supported yet.
+It simplifies the flock way and add some very usefull features.
+It's not just a wrapper, it's a cuncurrancy manager:
+infact you can make your preferred execution queue blocking others processes from reading and/or writing.
 
 ## Installation
 
