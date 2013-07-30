@@ -48,10 +48,15 @@ class ConcurrentFile
     public function read()
     {
         if (!file_exists($this->path)) throw new Exception("File not exist at " . $this->path);
-        $this->readLock();
+        $last ="";
+        if(!empty($this->locks))
+        {
+            $last = $this->locks[count($this->locks)-1];
+        }
+        if($last != LOCK_EX) $this->readLock();
         rewind($this->handle);
         $contents = fread($this->handle, filesize($this->path)); 
-        $this->releaseLock(); 
+        if($last != LOCK_EX) $this->releaseLock(); 
         return $contents;  
     }
     
