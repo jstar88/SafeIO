@@ -23,6 +23,7 @@ class ConcurrentFile
      */
     public function __construct($path)
     {
+        if (!file_exists($path)) throw new Exception("File not exist at " . $path);
         $this->path = $path;
         $this->handle = fopen($path, "a+");
         if (!$this->handle) throw new Exception("Error while opening the file " . $path);
@@ -84,7 +85,6 @@ class ConcurrentFile
      */
     public function read()
     {
-        if (!file_exists($this->path)) throw new Exception("File not exist at " . $this->path);
         $last = $this->locks[count($this->locks)-1];
         if($last != LOCK_EX && $last != LOCK_SH) $this->readLock();
         rewind($this->handle);
