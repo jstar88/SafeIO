@@ -1,5 +1,12 @@
 <?php
-
+/**
+ * SafeIO
+ * Class that read and write content to a file
+ * @author Covolo Nicola
+ * @copyright 2013
+ * @license GNU v3
+ * @version 2
+ */
 class ConcurrentFile
 {
     const PERMISSIONS = 0664;
@@ -13,6 +20,7 @@ class ConcurrentFile
         $this->path = $path;
         $this->handle = fopen($path, "a+");
         if (!$this->handle) throw new Exception("Error while opening the file " . $path);
+        $this->locks[] = LOCK_UN;
     }
 
     public function close()
@@ -30,8 +38,9 @@ class ConcurrentFile
 
     public function write($contents, $reset = true)
     {
-        $this->writeLock();        
-        if ($reset)
+        $last = $this->locks[count($this->locks)-1];
+        if($last != LOCK_EX) $this->writeLock();        
+        if($reset)
         {
             ftruncate($this->handle, 0);  
         }
@@ -41,22 +50,18 @@ class ConcurrentFile
         }     
         if (fputs($this->handle, $contents) === false) throw new Exception("Error while saving contents at " . $this->path);        
         fflush($this->handle);
-        $this->releaseLock();
+        if($last != LOCK_EX) $this->releaseLock();
         return $this;
     }
 
     public function read()
     {
         if (!file_exists($this->path)) throw new Exception("File not exist at " . $this->path);
-        $last ="";
-        if(!empty($this->locks))
-        {
-            $last = $this->locks[count($this->locks)-1];
-        }
-        if($last != LOCK_EX) $this->readLock();
+        $last = $this->locks[count($this->locks)-1];
+        if($last != LOCK_EX && $last != LOCK_SH) $this->readLock();
         rewind($this->handle);
         $contents = fread($this->handle, filesize($this->path)); 
-        if($last != LOCK_EX) $this->releaseLock(); 
+        if($last != LOCK_EX && $last != LOCK_SH) $this->releaseLock(); 
         return $contents;  
     }
     
@@ -78,12 +83,10 @@ class ConcurrentFile
 
     public function releaseLock()
     {
-        $mode = array_pop($this->locks);  
-        if ($mode == null)
-        {
-            $mode = LOCK_UN;    
-        }
-        flock($this->handle, $mode);  
+        $last = array_pop($this->locks);
+        if ($last == LOCK_UN) throw new Exception("Wrong explicit usage of locks");
+        $last = $this->locks[count($this->locks)-1];
+        flock($this->handle, $last);  
         return $this;   
     }
 
