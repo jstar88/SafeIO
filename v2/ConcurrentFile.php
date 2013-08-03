@@ -63,7 +63,9 @@ class ConcurrentFile
     public function write($contents, $reset = true)
     {
         $last = $this->locks[count($this->locks)-1];
-        if($last != LOCK_EX) $this->writeLock();        
+        if($last != LOCK_EX) $this->writeLock();  
+        
+        //--- discard old contents means put the pointer at start ---      
         if($reset)
         {
             ftruncate($this->handle, 0);  
@@ -71,9 +73,21 @@ class ConcurrentFile
         else
         {
             fseek($this->handle, 0, SEEK_END);
-        }     
-        if (fputs($this->handle, $contents) === false) throw new Exception("Error while saving contents at " . $this->path);        
+        }
+        //--- end ---
+        
+        //--- safe writing system ---
+        $total = 0;
+        $len = strlen($contents);
+        while ($total < $len && ($written = fwrite($this->handle, $contents))) 
+        {
+            if($written === false) throw new Exception("Error writing " . $this->path);
+            $total += $written;
+            $contents = substr($contents, $written);
+        }
         fflush($this->handle);
+        //--- end ---
+               
         if($last != LOCK_EX) $this->releaseLock();
         return $this;
     }
@@ -87,8 +101,27 @@ class ConcurrentFile
     {
         $last = $this->locks[count($this->locks)-1];
         if($last != LOCK_EX && $last != LOCK_SH) $this->readLock();
+        
+        //--- moving pointer to the start ---
         rewind($this->handle);
-        $contents = fread($this->handle, filesize($this->path)); 
+        //--- end ---
+        
+        //--- safe reading system ---
+        $len = filesize($this->path); 
+        if($len == 0)
+        {
+            return "";
+        }       
+        $contents = '';
+        $read = 0;
+        while ($read < $len && ($buf = fread($this->handle, $len - $read))) 
+        {
+            if($buf === false) throw new Exception("Error reading " . $this->path);
+            $read += strlen($buf);
+            $contents .= $buf;
+        }   
+        //--- end ---
+                
         if($last != LOCK_EX && $last != LOCK_SH) $this->releaseLock(); 
         return $contents;  
     }
@@ -147,7 +180,6 @@ class ConcurrentFile
         }
         return self::$instances[$path];
     }
-
 }
 
 ?>
