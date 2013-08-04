@@ -130,7 +130,9 @@ It's easier to see the code ;)
 ```
 * close() will automatically call releaseLock() if needed;
 * inside the write lock you can also read and write whenever as you want;
-* inside the write lock, others processes are blocked from read and write.
+* inside the write lock, others processes are blocked from read and write;
+* usefull to perform a complete list of tasks sequentially;
+* preventing other processes from read may decrease performance.
 
 #### Read lock:
 
