@@ -181,3 +181,4 @@ In this example another process must wait for the end of *read and write* of thi
 * Don't use others php file functions in conjunction with SafeIO: allocating a different handle to files will release locks.  
 * SafeIO aim to manage general configurations files: for intensive-parallel load as user's data in a forum, consider to use a database.
 * Permission of files managed by SafeIO are automatically setted to 0664 to ensure security.
+* I will not implement a new system to prevent concurrancy on multithread server, php developers will improve flock by themselves when servers will be ready.
