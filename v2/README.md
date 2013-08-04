@@ -176,3 +176,9 @@ In this example another process must wait for the end of *read and write* of thi
     $file->close();
     echo $contents;
 ```
+
+#### Final considerations:
+Don't use others php file functions in conjunction with SafeIO: allocating a different handle  
+to files will release locks.
+SafeIO aim to manage general configurations files.  
+For intensive-parallel load as user's data in a forum, consider to use a database.
