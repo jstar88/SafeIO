@@ -2,7 +2,7 @@
 /**
  * SafeIO
  * Class that read and write content to a file in safe way.
- * @author Covolo Nicola
+ * @author jstar88
  * @copyright 2013
  * @license GNU v3
  * @version 2
